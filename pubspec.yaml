@@ -1,0 +1,44 @@
+name: spanish_master
+description: "A new Flutter project for learning Spanish with native audio."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  
+  # 私は、本物のネイティブ音声を再生するためにこのパッケージを追加しました
+  audioplayers: ^5.2.1
+  
+  # 私は、将来的に広告を表示するためにこれを追加しました
+  google_mobile_ads: ^7.0.0
+  flutter_tts: ^4.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+  # 私は、アイコンを自動生成するためにこのパッケージを追加しました
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  # 私は、アイコン画像と音声フォルダをアプリが認識できるように設定しました
+  assets:
+    - assets/images/
+    - assets/audio/
+
+# 私は、自作アイコンの設定をここで行います
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon.png"
+  web:
+    generate: true
+    image_path: "assets/images/icon.png"
