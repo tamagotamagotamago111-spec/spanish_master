@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-void main() async {
+void main() {
+  // 私は、初期化エラーを防ぐためにあえてシンプルな起動順序にしました
   WidgetsFlutterBinding.ensureInitialized();
-  // 私はスマホアプリとして広告を初期化します
-  MobileAds.instance.initialize();
   runApp(const SpanishMasterApp());
 }
 
@@ -29,41 +27,74 @@ class SpanishMasterApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Spanish Master 1000',
       theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
       home: const CategorySelectScreen(),
     );
   }
 }
 
-// --- 私は「カテゴリ選択画面」を新設しました ---
-class CategorySelectScreen extends StatelessWidget {
+// --- 私は「カテゴリ選択画面」を作成しました（検索機能付き） ---
+class CategorySelectScreen extends StatefulWidget {
   const CategorySelectScreen({super.key});
+  @override
+  State<CategorySelectScreen> createState() => _CategorySelectScreenState();
+}
+
+class _CategorySelectScreenState extends State<CategorySelectScreen> {
+  String _searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
-    // 私は、重複を除いたカテゴリリストを作成します
-    final categories = myWords.map((e) => e.category).toSet().toList();
+    // 私は、重複を除いたカテゴリリストを取得します
+    final allCategories = myWords.map((e) => e.category).toSet().toList();
+    // 私は、検索ワードに合うカテゴリだけを表示します
+    final filteredCategories =
+        allCategories.where((c) => c.contains(_searchQuery)).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Categorías (カテゴリ選択)')),
-      body: ListView.builder(
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: const Icon(Icons.folder_open),
-            title: Text(categories[index]),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        WordListScreen(category: categories[index])),
-              );
-            },
-          );
-        },
+      appBar: AppBar(
+        title: const Text('Categorías (カテゴリ選択)'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'カテゴリを検索...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) => setState(() => _searchQuery = value),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredCategories.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: const Icon(Icons.folder, color: Colors.deepPurple),
+                  title: Text(filteredCategories[index]),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            WordListScreen(category: filteredCategories[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -78,56 +109,51 @@ class WordListScreen extends StatefulWidget {
 
 class _WordListScreenState extends State<WordListScreen> {
   final FlutterTts _tts = FlutterTts();
-  late List<Word> _displayWords;
   final Set<int> _favorites = {};
-  final Set<int> _revealedIds = {}; // 私は、タップして露出した単語のIDを管理します
+  final Set<int> _revealedIds = {};
 
   @override
   void initState() {
     super.initState();
-    // 私は選択されたカテゴリでフィルタリングします
-    _displayWords =
-        myWords.where((w) => w.category == widget.category).toList();
     _setupTts();
   }
 
   void _setupTts() async {
     await _tts.setLanguage("es-ES");
-    await _tts.setSpeechRate(0.8); // 私は速度を調整しました
+    await _tts.setSpeechRate(1.0); // 私は、ご要望通り2倍速（1.0）に設定しました
   }
 
   void _speakAndReveal(Word word) async {
-    setState(() {
-      _revealedIds.add(word.id); // 私はスペイン語を露出させます
-    });
+    setState(() => _revealedIds.add(word.id));
     await _tts.speak(word.sp);
   }
 
   @override
   Widget build(BuildContext context) {
+    final displayWords =
+        myWords.where((w) => w.category == widget.category).toList();
+
     return Scaffold(
       appBar: AppBar(title: Text('${widget.category} 練習')),
       body: ListView.builder(
-        itemCount: _displayWords.length,
+        itemCount: displayWords.length,
         itemBuilder: (context, index) {
-          final word = _displayWords[index];
+          final word = displayWords[index];
           final isRevealed = _revealedIds.contains(word.id);
           final isFav = _favorites.contains(word.id);
 
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: ListTile(
-              leading:
-                  Icon(word.icon, size: 40, color: Colors.deepPurple), // ピクトグラム
+              leading: Icon(word.icon, size: 35, color: Colors.deepPurple),
               title: Text(
-                isRevealed ? word.sp : "タップで表示", // スペイン語は最初は隠します
+                isRevealed ? word.sp : "タップして発音を表示", // 私は最初は隠します
                 style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: isRevealed ? Colors.black : Colors.grey[400]),
+                    color: isRevealed ? Colors.deepPurple : Colors.grey[400]),
               ),
-              subtitle:
-                  Text(word.jp, style: const TextStyle(fontSize: 16)), // 日本語は露出
+              subtitle: Text(word.jp), // 私は日本語を露出させます
               trailing: IconButton(
                 icon: Icon(isFav ? Icons.star : Icons.star_border,
                     color: isFav ? Colors.orange : null),
@@ -135,7 +161,7 @@ class _WordListScreenState extends State<WordListScreen> {
                     ? _favorites.remove(word.id)
                     : _favorites.add(word.id)),
               ),
-              onTap: () => _speakAndReveal(word), // タップで綴り露出＋発音
+              onTap: () => _speakAndReveal(word),
             ),
           );
         },
@@ -3599,3 +3625,6 @@ final List<Word> myWords = [
       icon: Icons.wb_twilight,
       category: "時"),
 ];
+// 私は、ここに広告ユニットIDを貼り付けます
+final String adUnitId =
+    'ca-app-pub-1313663524693433/6230919662'; // ここを広告ユニットIDに！'; // ここを広告ユニットIDに！

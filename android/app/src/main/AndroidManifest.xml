@@ -1,19 +1,19 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.spanish_master"> <uses-permission android:name="android.permission.INTERNET"/>
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Spanish Master"
+        android:label="spanish_master"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
-
+        android:icon="@mipmap/ic_launcher">
+        
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"/> <activity
+            android:value="ca-app-pub-1313663524693433~2389901092
+
+"/> <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|screenLayout|density|layoutDirection"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
             <meta-data
@@ -25,7 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
